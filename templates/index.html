@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Insurance Policy Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .form-section {
+            padding: 40px;
+        }
+
+        /* .form-group {
+            margin-bottom: 25px;
+        } */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .upload-box {
+            border: 2px dashed rgba(255, 255, 255, 0.4);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            transition: 0.3s;
+        }
+
+        .upload-box:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #60a5fa;
+        }
+
+        .upload-box input {
+            display: none;
+        }
+
+        .upload-box svg {
+            width: 50px;
+            height: 50px;
+            color: #60a5fa;
+            margin-bottom: 10px;
+        }
+
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        input[type="text"],
+        input[type="file"],
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        input[type="file"] {
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .result-section {
+            padding: 0 40px 40px 40px;
+        }
+
+        .result-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .result-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-value {
+            color: #333;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .decision {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .decision.approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .decision.rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-style: italic;
+        }
+
+        .clause-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .form-section,
+            .result-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️AI Insurance Policy Analyzer</h1>
+            <p>Instant Policy Analysis</p>
+        </div>
+
+        <div class="form-section">
+            <form id="upload-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">First Name *</label>
+                        <input type="text" id="name" name="name" placeholder="Enter your first name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="surname">Surname *</label>
+                        <input type="text" id="surname" name="surname" placeholder="Enter your surname" required>
+                    </div>
+                </div>
+
+                <!-- <div class="form-group">
+                    <label for="policy_pdf">Upload Policy Document (PDF) *</label>
+                    <input type="file" id="policy_pdf" name="policy_pdf" accept=".pdf" required>
+                </div> -->
+
+                <div class="form-group">
+                    <label for="policy_pdf" style="color:white; font-weight:600;">Upload Policy Document (PDF) *</label>
+                    <label class="upload-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <p>Click or drag a PDF file here to upload</p>
+                        <input type="file" id="policy_pdf" name="policy_pdf" accept=".pdf" required>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label for="query">Claim Details *</label>
+                    <textarea id="query" name="query"
+                        placeholder="Enter insurance claim details (e.g., knee surgery, medical expenses, hospitalization dates, etc.)"
+                        rows="4" required></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn">Analyze Policy</button>
+            </form>
+        </div>
+
+        <div class="result-section">
+            <h2>📋 Analysis Result</h2>
+            <div class="result-box" id="result">
+                <div class="loading">Waiting for analysis...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("upload-form").onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const resultDiv = document.getElementById("result");
+
+            resultDiv.innerHTML = '<div class="loading">⏳ Analyzing your policy, please wait...</div>';
+
+            try {
+                const res = await fetch("/analyze", { method: "POST", body: formData });
+                const data = await res.json();
+
+                const name = formData.get('name');
+                const surname = formData.get('surname');
+
+                // Format the output in a human-readable way
+                let html = `
+                    <div class="result-item">
+                        <div class="result-value" style="font-size: 18px; line-height: 1.8;">
+                            <p><strong>Dear ${name} ${surname},</strong></p>
+                            <br>
+                            <p>Thank you for submitting your insurance claim. After careful review of your policy document and claim details, we have completed our analysis.</p>
+                            <br>
+                            <p><strong>Claim Decision:</strong> <span class="decision ${data.decision}">${data.decision.toUpperCase()}</span></p>
+                            <br>
+                            <p><strong>Approved Amount:</strong> ${data.amount}</p>
+                            <br>
+                            <p><strong>Explanation:</strong><br>${data.justification}</p>
+                `;
+
+                if (data.referenced_clauses && data.referenced_clauses.length > 0) {
+                    html += `
+                            <br>
+                            <p><strong>Relevant Policy Clauses:</strong></p>
+                            <p>The following sections of your insurance policy were referenced in this decision:</p>
+                    `;
+                    data.referenced_clauses.forEach((clause, index) => {
+                        html += `<div class="clause-item"><strong>Clause ${index + 1}:</strong> ${clause}</div>`;
+                    });
+                }
+
+                html += `
+                            <br>
+                            <p>If you have any questions about this decision or need further clarification, please contact our customer service department.</p>
+                            <br>
+                            <p>Best regards,<br><strong>Insurance Claims Department</strong></p>
+                        </div>
+                    </div>
+                `;
+
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.innerHTML = '<div class="loading" style="color: #dc3545;">❌ Error analyzing policy. Please try again.</div>';
+            }
+        };
+    </script>
+</body>
+
+</html>
