@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from analyser import read_pdf, chunk_text, embed_chunks, get_top_k_chunks, parse_query_with_gemini, make_decision_with_gemini
+from deep_translator import GoogleTranslator
 
 from db import collection
 import json, os
@@ -41,6 +42,24 @@ def analyze():
         decision_data = json.loads(decision_cleaned)
     except:
         decision_data = {"error": "Failed to parse decision", "raw": decision_raw}
+    
+
+
+# ✅ Translate decision + justification into Marathi
+    try:
+        if "decision" in decision_data or "justification" in decision_data:
+            english_text = (
+                f"Decision: {decision_data.get('decision', '')}\n"
+                f"Amount: {decision_data.get('amount', '')}\n"
+                f"Justification: {decision_data.get('justification', '')}"
+            )
+            marathi_translation = GoogleTranslator(source='auto', target='mr').translate(english_text)
+            decision_data["translation"] = {
+                "english": english_text,
+                "marathi": marathi_translation
+            }
+    except Exception as e:
+        decision_data["translation_error"] = str(e)
 
     # Step 3: Store in MongoDB
     collection.insert_one({

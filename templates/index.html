@@ -10,6 +10,30 @@
             box-sizing: border-box;
         }
 
+        .uploaded {
+            border-color: #22c55e !important;
+            background: rgba(34, 197, 94, 0.1) !important;
+            color: #22c55e !important;
+        }
+
+        .uploaded p {
+            font-weight: 600;
+        }
+
+        #closeUpload {
+            display: inline-block;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            line-height: 18px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -52,6 +76,28 @@
         } */
         .form-group {
             margin-bottom: 25px;
+        }
+
+        .loading::after {
+            content: "";
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #667eea;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            margin-left: 8px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .upload-box {
@@ -178,9 +224,9 @@
 
         .result-label {
             font-weight: 600;
-            color: #667eea;
+            color: #0f0f10;
             margin-bottom: 8px;
-            font-size: 14px;
+            font-size: 18px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -265,7 +311,7 @@
                     <input type="file" id="policy_pdf" name="policy_pdf" accept=".pdf" required>
                 </div> -->
 
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <label for="policy_pdf" style="color:white; font-weight:600;">Upload Policy Document (PDF) *</label>
                     <label class="upload-box">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -274,7 +320,18 @@
                         <p>Click or drag a PDF file here to upload</p>
                         <input type="file" id="policy_pdf" name="policy_pdf" accept=".pdf" required>
                     </label>
+                </div> -->
+                <div class="form-group">
+                    <label for="policy_pdf" style="color:white; font-weight:600;">Upload Policy Document (PDF) *</label>
+                    <label class="upload-box" id="uploadBox">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <p id="uploadText">Click or drag a PDF file here to upload</p>
+                        <input type="file" id="policy_pdf" name="policy_pdf" accept=".pdf" required>
+                    </label>
                 </div>
+
 
                 <div class="form-group">
                     <label for="query">Claim Details *</label>
@@ -296,6 +353,40 @@
     </div>
 
     <script>
+        // Handle PDF upload visual feedback
+        const pdfInput = document.getElementById("policy_pdf");
+        const uploadBox = document.getElementById("uploadBox");
+        const uploadText = document.getElementById("uploadText");
+        const submitBtn = document.querySelector(".submit-btn");
+
+        submitBtn.disabled = true;
+
+        pdfInput.addEventListener("change", () => {
+            const file = pdfInput.files[0];
+            if (file && file.type === "application/pdf") {
+                uploadBox.classList.add("uploaded");
+                uploadText.innerHTML = `
+                ✅ ${file.name}
+                <button id="closeUpload" title="Remove file">&times;</button>
+            `;
+                submitBtn.disabled = false;
+                pdfInput.setAttribute("readonly", true);
+
+
+                document.getElementById("closeUpload").onclick = () => {
+                    pdfInput.value = "";
+                    pdfInput.disabled = false;
+                    uploadBox.classList.remove("uploaded");
+                    uploadText.innerHTML = "Click or drag a PDF file here to upload";
+                    submitBtn.disabled = true;
+                };
+            } else {
+                alert("Please upload a valid PDF file.");
+                pdfInput.value = "";
+            }
+        });
+
+        // Handle form submission
         document.getElementById("upload-form").onsubmit = async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
@@ -310,40 +401,40 @@
                 const name = formData.get('name');
                 const surname = formData.get('surname');
 
-                // Format the output in a human-readable way
                 let html = `
-                    <div class="result-item">
-                        <div class="result-value" style="font-size: 18px; line-height: 1.8;">
-                            <p><strong>Dear ${name} ${surname},</strong></p>
-                            <br>
-                            <p>Thank you for submitting your insurance claim. After careful review of your policy document and claim details, we have completed our analysis.</p>
-                            <br>
-                            <p><strong>Claim Decision:</strong> <span class="decision ${data.decision}">${data.decision.toUpperCase()}</span></p>
-                            <br>
-                            <p><strong>Approved Amount:</strong> ${data.amount}</p>
-                            <br>
-                            <p><strong>Explanation:</strong><br>${data.justification}</p>
+                <div class="result-item">
+                    <div class="result-value" style="font-size: 18px; line-height: 1.8;">
+                        <p><strong>Dear ${name} ${surname},</strong></p><br>
+                        <p>Thank you for submitting your insurance claim. After careful review of your policy document and claim details, we have completed our analysis.</p><br>
+                        <p><strong>Claim Decision:</strong> <span class="decision ${data.decision?.toLowerCase()}">${data.decision?.toUpperCase()}</span></p><br>
+                        <p><strong>Approved Amount:</strong> ${data.amount}</p><br>
+                        <p><strong>Explanation:</strong><br>${data.justification}</p>
+            `;
+
+                if (data.translation && data.translation.marathi) {
+                    html += `
+                    <br><div class="result-item">
+                        <div class="result-label">मराठी अनुवाद:</div>
+                        <div class="result-value" style="font-size: 15px; color: #444;">
+                            ${data.translation.marathi.replace(/\n/g, '<br>')}
+                        </div>
+                    </div>
                 `;
+                }
 
                 if (data.referenced_clauses && data.referenced_clauses.length > 0) {
-                    html += `
-                            <br>
-                            <p><strong>Relevant Policy Clauses:</strong></p>
-                            <p>The following sections of your insurance policy were referenced in this decision:</p>
-                    `;
+                    html += `<br><p><strong>Relevant Policy Clauses:</strong></p>`;
                     data.referenced_clauses.forEach((clause, index) => {
                         html += `<div class="clause-item"><strong>Clause ${index + 1}:</strong> ${clause}</div>`;
                     });
                 }
 
                 html += `
-                            <br>
-                            <p>If you have any questions about this decision or need further clarification, please contact our customer service department.</p>
-                            <br>
-                            <p>Best regards,<br><strong>Insurance Claims Department</strong></p>
-                        </div>
+                        <br><p>If you have any questions, please contact our customer service department.</p>
+                        <br><p>Best regards,<br><strong>Insurance Claims Department</strong></p>
                     </div>
-                `;
+                </div>
+            `;
 
                 resultDiv.innerHTML = html;
             } catch (error) {
